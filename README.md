@@ -114,6 +114,12 @@ python src/product/cli.py "refund denied after warranty claim" --top-k 5
 6) Product-layer GUI (Streamlit dashboard):
 
 ```bash
+python src/product/app.py
+```
+
+Or, if Streamlit is on PATH:
+
+```bash
 streamlit run src/product/app.py
 ```
 

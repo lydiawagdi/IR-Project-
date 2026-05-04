@@ -1,8 +1,35 @@
 import json
+import importlib
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Dict, List
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+APP_SCRIPT_PATH = Path(__file__).resolve()
+
+
+def bootstrap_streamlit_runtime() -> None:
+    """When run with `python app.py`, re-launch using `python -m streamlit run`."""
+    try:
+        scriptrunner_module = importlib.import_module("streamlit.runtime.scriptrunner")
+        get_script_run_ctx = getattr(scriptrunner_module, "get_script_run_ctx", None)
+    except Exception:
+        get_script_run_ctx = None
+
+    if get_script_run_ctx and get_script_run_ctx() is not None:
+        return
+
+    launch_command = [sys.executable, "-m", "streamlit", "run", str(APP_SCRIPT_PATH)]
+    launch_command.extend(sys.argv[1:])
+    raise SystemExit(subprocess.call(launch_command, cwd=str(PROJECT_ROOT)))
+
+
+if __name__ == "__main__":
+    bootstrap_streamlit_runtime()
+
 
 import numpy as np
 import pandas as pd
@@ -13,7 +40,13 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 DEFAULT_DATASET = Path("data/processed/clean_reviews_ai.json")
 FIGURES_DIR = Path("reports/figures")
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SCRAPER_WALKTHROUGH_STEPS = [
+    ("Checking robots.txt permissions", "[ROBOTS]"),
+    ("Loading complaints sitemap index", "[SITEMAP]"),
+    ("Selecting complaint page URLs", "[URLS]"),
+    ("Extracting review text and metadata", "[EXTRACT]"),
+    ("Filtering warranty/return relevant records", "[FILTER]"),
+]
 
 
 def load_records(path: Path) -> List[Dict]:
@@ -98,72 +131,94 @@ def run_command(command: List[str]) -> Dict[str, str]:
     }
 
 
-def render_pipeline_runner() -> None:
+def render_scraper_walkthrough() -> None:
+    st.markdown("#### Scraper Walkthrough")
+    st.caption("Quick preview of what happens behind the scenes before live scraping starts.")
+
+    status_placeholder = st.empty()
+    progress_bar = st.progress(0, text="Preparing scraper...")
+    animation_frames = ["", ".", "..", "..."]
+    total_frames = len(SCRAPER_WALKTHROUGH_STEPS) * len(animation_frames)
+    frame_counter = 0
+
+    for step, emoji in SCRAPER_WALKTHROUGH_STEPS:
+        for frame in animation_frames:
+            frame_counter += 1
+            progress_pct = int((frame_counter / total_frames) * 100)
+            status_placeholder.info(f"{emoji} {step}{frame}")
+            progress_bar.progress(progress_pct, text=f"{step}{frame}")
+            time.sleep(0.12)
+
+    status_placeholder.success("Scraper launched: collecting live complaint pages now.")
+    progress_bar.progress(100, text="Scraper is running...")
+
+
+def run_pipeline_steps(run_scraper: bool, target_records: int, max_sitemaps: int, crawl_delay: float) -> None:
+    steps: List[tuple[str, List[str]]] = []
+
+    if run_scraper:
+        steps.append(
+            (
+                "Scraper",
+                [
+                    sys.executable,
+                    "src/scraper/scrape_complaints.py",
+                    "--target-records",
+                    str(int(target_records)),
+                    "--max-sitemaps",
+                    str(int(max_sitemaps)),
+                    "--crawl-delay",
+                    str(float(crawl_delay)),
+                ],
+            )
+        )
+    steps.extend(
+        [
+            ("Preprocess", [sys.executable, "src/pipeline/preprocess.py"]),
+            ("AI Enrichment", [sys.executable, "src/analysis/ai_issue_classifier.py"]),
+            ("EDA & Charts", [sys.executable, "src/analysis/eda.py"]),
+        ]
+    )
+
+    all_ok = True
+    for step_name, command in steps:
+        if step_name == "Scraper":
+            render_scraper_walkthrough()
+        with st.spinner(f"Running {step_name}..."):
+            result = run_command(command)
+        success = result["exit_code"] == "0"
+        if success:
+            st.success(f"{step_name} finished successfully.")
+        else:
+            st.error(f"{step_name} failed with exit code {result['exit_code']}.")
+            all_ok = False
+
+        if result["stdout"]:
+            st.caption(f"{step_name} stdout")
+            st.code(result["stdout"], language="text")
+        if result["stderr"]:
+            st.caption(f"{step_name} stderr")
+            st.code(result["stderr"], language="text")
+
+        if not success:
+            break
+
+    if all_ok:
+        st.success("Pipeline completed. Click the button below to reload data in this UI.")
+        if st.button("Reload App Data", use_container_width=True):
+            st.rerun()
+
+
+def render_pipeline_runner(run_scraper: bool, target_records: int, max_sitemaps: int, crawl_delay: float) -> None:
     st.subheader("Pipeline Runner")
     st.caption("Run data collection and processing directly from this GUI.")
-
-    run_scraper = st.checkbox("Run scraper step", value=True)
-    target_records = st.number_input("Target records", min_value=50, max_value=300, value=80, step=10)
-    max_sitemaps = st.number_input("Max sitemaps", min_value=1, max_value=10, value=2, step=1)
-    crawl_delay = st.number_input("Crawl delay (seconds)", min_value=0.1, max_value=3.0, value=0.5, step=0.1)
-
     st.info(
         "Pipeline order: Scraper (optional) -> Preprocess -> AI enrichment -> EDA/charts. "
         "This may take a few minutes."
     )
 
     if st.button("Run Pipeline Now", type="primary", use_container_width=True):
-        steps: List[tuple[str, List[str]]] = []
-
-        if run_scraper:
-            steps.append(
-                (
-                    "Scraper",
-                    [
-                        sys.executable,
-                        "src/scraper/scrape_complaints.py",
-                        "--target-records",
-                        str(int(target_records)),
-                        "--max-sitemaps",
-                        str(int(max_sitemaps)),
-                        "--crawl-delay",
-                        str(float(crawl_delay)),
-                    ],
-                )
-            )
-        steps.extend(
-            [
-                ("Preprocess", [sys.executable, "src/pipeline/preprocess.py"]),
-                ("AI Enrichment", [sys.executable, "src/analysis/ai_issue_classifier.py"]),
-                ("EDA & Charts", [sys.executable, "src/analysis/eda.py"]),
-            ]
-        )
-
-        all_ok = True
-        for step_name, command in steps:
-            with st.spinner(f"Running {step_name}..."):
-                result = run_command(command)
-            success = result["exit_code"] == "0"
-            if success:
-                st.success(f"{step_name} finished successfully.")
-            else:
-                st.error(f"{step_name} failed with exit code {result['exit_code']}.")
-                all_ok = False
-
-            if result["stdout"]:
-                st.caption(f"{step_name} stdout")
-                st.code(result["stdout"], language="text")
-            if result["stderr"]:
-                st.caption(f"{step_name} stderr")
-                st.code(result["stderr"], language="text")
-
-            if not success:
-                break
-
-        if all_ok:
-            st.success("Pipeline completed. Click the button below to reload data in this UI.")
-            if st.button("Reload App Data", use_container_width=True):
-                st.rerun()
+        run_pipeline_steps(run_scraper, target_records, max_sitemaps, crawl_delay)
 
 
 def main() -> None:
@@ -176,6 +231,39 @@ def main() -> None:
     query = st.sidebar.text_input("Search query", "warranty claim denied refund")
     return_only = st.sidebar.checkbox("Only records with return mention", value=False)
     warranty_only = st.sidebar.checkbox("Only records with warranty mention", value=False)
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("Quick Pipeline Run")
+    run_scraper = st.sidebar.checkbox("Run scraper step", value=True, key="pipeline_run_scraper")
+    target_records = st.sidebar.number_input(
+        "Target records",
+        min_value=50,
+        max_value=300,
+        value=80,
+        step=10,
+        key="pipeline_target_records",
+    )
+    max_sitemaps = st.sidebar.number_input(
+        "Max sitemaps",
+        min_value=1,
+        max_value=10,
+        value=2,
+        step=1,
+        key="pipeline_max_sitemaps",
+    )
+    crawl_delay = st.sidebar.number_input(
+        "Crawl delay (seconds)",
+        min_value=0.1,
+        max_value=3.0,
+        value=0.5,
+        step=0.1,
+        key="pipeline_crawl_delay",
+    )
+    sidebar_run_pipeline = st.sidebar.button(
+        "Run Pipeline Now",
+        type="primary",
+        use_container_width=True,
+        key="pipeline_sidebar_run",
+    )
 
     try:
         records = load_records(Path(dataset_path))
@@ -193,6 +281,10 @@ def main() -> None:
     col1.metric("Total records loaded", len(records))
     col2.metric("Filtered records", len(filtered))
     col3.metric("Distinct companies", len({r.get("company") for r in filtered}))
+
+    if sidebar_run_pipeline:
+        st.subheader("Pipeline Runner Output")
+        run_pipeline_steps(run_scraper, int(target_records), int(max_sitemaps), float(crawl_delay))
 
     tab_search, tab_data, tab_figures, tab_pipeline = st.tabs(
         ["Search", "Dataset Preview", "Charts", "Pipeline Runner"]
@@ -216,7 +308,7 @@ def main() -> None:
         render_figures()
 
     with tab_pipeline:
-        render_pipeline_runner()
+        render_pipeline_runner(run_scraper, int(target_records), int(max_sitemaps), float(crawl_delay))
 
 
 if __name__ == "__main__":

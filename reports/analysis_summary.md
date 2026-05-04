@@ -1,37 +1,37 @@
 # Phase 1 EDA Summary
 
-- Total records: **80**
-- Distinct companies: **78**
-- Return mentions: **44**
-- Warranty mentions: **32**
+- Total records: **100**
+- Distinct companies: **91**
+- Return mentions: **56**
+- Warranty mentions: **40**
 - Average rating: **None**
-- Average reliability score: **81.375**
+- Average reliability score: **80.64**
 
 ## Top issue categories
-- refund_return_issue: 56
-- billing_issue: 46
-- delivery_issue: 37
-- warranty_claim_issue: 36
-- support_issue: 24
-- defective_product: 20
+- refund_return_issue: 72
+- billing_issue: 56
+- warranty_claim_issue: 46
+- delivery_issue: 44
+- support_issue: 35
+- defective_product: 28
 - other: 2
 
 ## Top keywords
-- told: 138
-- said: 118
-- called: 88
-- time: 87
-- new: 79
-- phone: 69
-- account: 67
-- did: 66
-- credit: 62
-- just: 62
-- received: 53
-- house: 53
-- return: 52
-- asked: 50
-- truck: 49
+- told: 159
+- said: 133
+- called: 113
+- time: 111
+- new: 89
+- phone: 87
+- did: 86
+- account: 79
+- just: 74
+- credit: 69
+- received: 68
+- house: 67
+- asked: 65
+- return: 62
+- money: 62
 
 ## Generated figures
 - reports/figures/rating_distribution.png

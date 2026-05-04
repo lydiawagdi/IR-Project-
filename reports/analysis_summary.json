@@ -1,33 +1,33 @@
 {
-  "total_records": 80,
-  "records_with_return_mentions": 44,
-  "records_with_warranty_mentions": 32,
+  "total_records": 100,
+  "records_with_return_mentions": 56,
+  "records_with_warranty_mentions": 40,
   "avg_rating": null,
-  "avg_reliability_score": 81.375,
+  "avg_reliability_score": 80.64,
   "top_issue_categories": [
     [
       "refund_return_issue",
-      56
+      72
     ],
     [
       "billing_issue",
+      56
+    ],
+    [
+      "warranty_claim_issue",
       46
     ],
     [
       "delivery_issue",
-      37
-    ],
-    [
-      "warranty_claim_issue",
-      36
+      44
     ],
     [
       "support_issue",
-      24
+      35
     ],
     [
       "defective_product",
-      20
+      28
     ],
     [
       "other",
@@ -37,84 +37,84 @@
   "top_keywords": [
     [
       "told",
-      138
+      159
     ],
     [
       "said",
-      118
+      133
     ],
     [
       "called",
-      88
+      113
     ],
     [
       "time",
-      87
+      111
     ],
     [
       "new",
-      79
+      89
     ],
     [
       "phone",
-      69
-    ],
-    [
-      "account",
-      67
+      87
     ],
     [
       "did",
-      66
+      86
     ],
     [
-      "credit",
-      62
+      "account",
+      79
     ],
     [
       "just",
-      62
+      74
+    ],
+    [
+      "credit",
+      69
     ],
     [
       "received",
-      53
+      68
     ],
     [
       "house",
-      53
-    ],
-    [
-      "return",
-      52
+      67
     ],
     [
       "asked",
-      50
+      65
     ],
     [
-      "truck",
-      49
+      "return",
+      62
     ],
     [
       "money",
-      47
+      62
     ],
     [
-      "card",
-      44
+      "telus",
+      59
+    ],
+    [
+      "2006",
+      58
     ],
     [
       "day",
-      44
+      58
     ],
     [
-      "days",
-      44
+      "pay",
+      56
     ],
     [
       "problem",
-      43
+      55
     ]
   ],
-  "company_count": 78
+  "company_count": 91
 }
