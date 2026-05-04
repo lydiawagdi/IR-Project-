@@ -5,4 +5,5 @@ pandas
 requests
 scikit-learn
 seaborn
+streamlit
 wordcloud

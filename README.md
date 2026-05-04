@@ -97,6 +97,18 @@ python src/analysis/eda.py
 python src/product/cli.py "refund denied after warranty claim" --top-k 5
 ```
 
+6) Product-layer GUI (Streamlit dashboard):
+
+```bash
+streamlit run src/product/app.py
+```
+
+Inside the GUI, open the **Pipeline Runner** tab and click **Run Pipeline Now** to execute:
+- scraper (optional)
+- preprocessing
+- AI enrichment
+- EDA/chart generation
+
 ## Outputs
 
 - Raw dataset: `data/raw/raw_reviews.json`
@@ -124,4 +136,6 @@ python src/product/cli.py "refund denied after warranty claim" --top-k 5
 - **EDA**: `src/analysis/eda.py` + generated insights
 - **Visualization**: charts in `reports/figures/`
 - **AI feature**: `src/analysis/ai_issue_classifier.py`
-- **Product interface**: searchable CLI in `src/product/cli.py`
+- **Product interface**:
+  - searchable CLI in `src/product/cli.py`
+  - Streamlit GUI dashboard in `src/product/app.py`
