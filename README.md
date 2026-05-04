@@ -65,6 +65,20 @@ reports/
 python -m pip install -r requirements.txt
 ```
 
+### One-command Windows bootstrap
+
+If you are setting up on a new Windows machine, use:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\bootstrap_windows.ps1
+```
+
+This script:
+- installs Python 3.12 via `winget` if missing,
+- creates `.venv`,
+- upgrades `pip`,
+- installs all dependencies from `requirements.txt` (including Streamlit).
+
 ## Run Pipeline
 
 1) Scrape raw records (multi-page crawl via sitemaps):
