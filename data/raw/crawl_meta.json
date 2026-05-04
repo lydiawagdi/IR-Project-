@@ -1,6 +1,6 @@
 {
-  "target_records": 100,
-  "records_collected": 100,
+  "target_records": 80,
+  "records_collected": 80,
   "max_sitemaps": 2,
   "sitemaps_used": [
     "https://www.complaintsboard.com/sitemap/complaints-1.xml",
@@ -8,5 +8,5 @@
   ],
   "user_agent": "IR-Project-WarrantyReturnAnalyzer/1.0 (+course-project)",
   "source": "https://www.complaintsboard.com",
-  "generated_at": "2026-05-04T20:43:33.977707+00:00"
+  "generated_at": "2026-05-04T21:11:57.169910+00:00"
 }

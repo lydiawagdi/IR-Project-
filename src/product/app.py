@@ -112,7 +112,7 @@ def render_figures() -> None:
     for fig in figure_files:
         path = FIGURES_DIR / fig
         if path.exists():
-            st.image(str(path), caption=fig, use_container_width=True)
+            st.image(str(path), caption=fig, width="stretch")
         else:
             st.info(f"Figure not found: {path}")
 
@@ -205,7 +205,7 @@ def run_pipeline_steps(run_scraper: bool, target_records: int, max_sitemaps: int
 
     if all_ok:
         st.success("Pipeline completed. Click the button below to reload data in this UI.")
-        if st.button("Reload App Data", use_container_width=True):
+        if st.button("Reload App Data", width="stretch"):
             st.rerun()
 
 
@@ -217,7 +217,7 @@ def render_pipeline_runner(run_scraper: bool, target_records: int, max_sitemaps:
         "This may take a few minutes."
     )
 
-    if st.button("Run Pipeline Now", type="primary", use_container_width=True):
+    if st.button("Run Pipeline Now", type="primary", width="stretch"):
         run_pipeline_steps(run_scraper, target_records, max_sitemaps, crawl_delay)
 
 
@@ -261,7 +261,7 @@ def main() -> None:
     sidebar_run_pipeline = st.sidebar.button(
         "Run Pipeline Now",
         type="primary",
-        use_container_width=True,
+        width="stretch",
         key="pipeline_sidebar_run",
     )
 
@@ -302,7 +302,7 @@ def main() -> None:
 
     with tab_data:
         df = pd.DataFrame(filtered)
-        st.dataframe(df, use_container_width=True, height=520)
+        st.dataframe(df, width="stretch", height=520)
 
     with tab_figures:
         render_figures()

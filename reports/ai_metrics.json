@@ -10,9 +10,9 @@
     "warranty_claim_issue"
   ],
   "class_counts": {
-    "defective_product": 15,
-    "refund_return_issue": 29,
-    "delivery_issue": 44,
+    "defective_product": 11,
+    "refund_return_issue": 20,
+    "delivery_issue": 37,
     "warranty_claim_issue": 9,
     "billing_issue": 1,
     "other": 2

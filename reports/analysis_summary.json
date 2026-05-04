@@ -1,33 +1,33 @@
 {
-  "total_records": 100,
-  "records_with_return_mentions": 56,
-  "records_with_warranty_mentions": 40,
+  "total_records": 80,
+  "records_with_return_mentions": 44,
+  "records_with_warranty_mentions": 32,
   "avg_rating": null,
-  "avg_reliability_score": 80.64,
+  "avg_reliability_score": 81.275,
   "top_issue_categories": [
     [
       "refund_return_issue",
-      72
-    ],
-    [
-      "billing_issue",
       56
     ],
     [
-      "warranty_claim_issue",
+      "billing_issue",
       46
     ],
     [
       "delivery_issue",
-      44
+      37
+    ],
+    [
+      "warranty_claim_issue",
+      36
     ],
     [
       "support_issue",
-      35
+      25
     ],
     [
       "defective_product",
-      28
+      20
     ],
     [
       "other",
@@ -37,84 +37,84 @@
   "top_keywords": [
     [
       "told",
-      159
+      137
     ],
     [
       "said",
-      133
-    ],
-    [
-      "called",
-      113
+      117
     ],
     [
       "time",
-      111
-    ],
-    [
-      "new",
       89
     ],
     [
+      "called",
+      88
+    ],
+    [
+      "new",
+      76
+    ],
+    [
       "phone",
-      87
-    ],
-    [
-      "did",
-      86
-    ],
-    [
-      "account",
-      79
-    ],
-    [
-      "just",
       74
     ],
     [
+      "account",
+      72
+    ],
+    [
+      "did",
+      70
+    ],
+    [
       "credit",
-      69
+      63
+    ],
+    [
+      "just",
+      61
     ],
     [
       "received",
-      68
+      58
     ],
     [
       "house",
-      67
-    ],
-    [
-      "asked",
-      65
-    ],
-    [
-      "return",
-      62
-    ],
-    [
-      "money",
-      62
-    ],
-    [
-      "telus",
-      59
-    ],
-    [
-      "2006",
-      58
-    ],
-    [
-      "day",
-      58
-    ],
-    [
-      "pay",
       56
     ],
     [
-      "problem",
-      55
+      "return",
+      52
+    ],
+    [
+      "asked",
+      49
+    ],
+    [
+      "truck",
+      49
+    ],
+    [
+      "money",
+      49
+    ],
+    [
+      "card",
+      46
+    ],
+    [
+      "pay",
+      45
+    ],
+    [
+      "day",
+      44
+    ],
+    [
+      "days",
+      44
     ]
   ],
-  "company_count": 91
+  "company_count": 77
 }
