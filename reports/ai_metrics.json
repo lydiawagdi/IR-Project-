@@ -1,0 +1,20 @@
+{
+  "model_used": "fallback_rule_based",
+  "reason": "insufficient label diversity, class size, or sample size",
+  "labels": [
+    "billing_issue",
+    "defective_product",
+    "delivery_issue",
+    "other",
+    "refund_return_issue",
+    "warranty_claim_issue"
+  ],
+  "class_counts": {
+    "defective_product": 11,
+    "refund_return_issue": 20,
+    "delivery_issue": 37,
+    "warranty_claim_issue": 9,
+    "billing_issue": 1,
+    "other": 2
+  }
+}

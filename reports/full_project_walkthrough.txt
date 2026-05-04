@@ -1,0 +1,490 @@
+Warranty & Return Analyzer - Full Project Walkthrough
+====================================================
+
+This document explains the project from start to finish:
+1) what problem is being solved,
+2) what each code file does,
+3) how data flows through the pipeline,
+4) a concrete example record transformed step by step,
+5) how to run and validate everything.
+
+
+------------------------------------------------------------
+1) Project Goal
+------------------------------------------------------------
+
+The project builds an Information Retrieval and data analysis system for warranty/return issues.
+
+Main idea:
+- Collect real complaint/review text from the web.
+- Keep only records relevant to warranty/return topics.
+- Clean and structure the data.
+- Label issues and estimate reliability.
+- Add an explainable AI layer (classification + suggestion).
+- Produce analysis summaries and charts.
+- Provide a query interface to retrieve the most relevant complaints.
+
+Selected source:
+- https://www.complaintsboard.com
+
+Why this source:
+- It is not a typical ecommerce site like Amazon.
+- It contains complaint-style long text, often useful for return/warranty cases.
+- It has sitemap pages that allow multi-page crawling.
+
+
+------------------------------------------------------------
+2) End-to-End Architecture
+------------------------------------------------------------
+
+Pipeline order:
+
+Step A - Scrape raw data
+  script: src/scraper/scrape_complaints.py
+  output: data/raw/raw_reviews.json
+          data/raw/crawl_log.json
+          data/raw/crawl_meta.json
+          data/raw/robots.txt
+
+Step B - Preprocess and quality checks
+  script: src/pipeline/preprocess.py
+  output: data/processed/clean_reviews.json
+          data/processed/preprocessing_summary.json
+
+Step C - AI enrichment
+  script: src/analysis/ai_issue_classifier.py
+  output: data/processed/clean_reviews_ai.json
+          reports/ai_metrics.json
+
+Step D - EDA and visualization
+  script: src/analysis/eda.py
+  output: reports/analysis_summary.json
+          reports/analysis_summary.md
+          reports/figures/*.png
+
+Step E - Product search interface
+  script: src/product/cli.py
+  output: terminal ranked search results
+
+
+------------------------------------------------------------
+3) File-by-File Code Explanation
+------------------------------------------------------------
+
+============================================================
+3.1 src/scraper/scrape_complaints.py
+============================================================
+
+Purpose:
+- Crawl complaint pages ethically.
+- Parse complaint text and metadata.
+- Keep only warranty/return-relevant records.
+
+Important constants:
+- BASE_URL, ROBOTS_URL, SITEMAP_INDEX
+- USER_AGENT for clear crawler identity
+- RETURN_KEYWORDS, WARRANTY_KEYWORDS, FOCUS_KEYWORDS
+
+Key functions:
+
+1) build_session()
+- Creates requests session with retry strategy.
+- Retries transient failures (429/5xx).
+- Adds custom User-Agent.
+
+2) load_robots_parser(session)
+- Downloads robots.txt and loads rules using RobotFileParser.
+- Used to check if each URL can be fetched.
+
+3) parse_sitemap_urls(xml_text)
+- Parses sitemap XML and extracts <loc> links.
+
+4) get_complaint_sitemaps(session, max_sitemaps)
+- Reads sitemap index.
+- Filters sitemap links to complaint-specific sitemap files.
+
+5) parse_company_name(soup)
+- Tries to infer company name from page heading first.
+- Falls back to schema tags or JSON-LD.
+- Returns "unknown" if extraction fails.
+
+6) parse_review_date(container)
+- Pulls itemprop=datePublished either from content attribute or text.
+
+7) parse_category(soup)
+- Reads breadcrumb links to infer category.
+
+8) extract_review_record(url, html)
+- Core parser for one complaint page.
+- Extracts review body, title, rating, date, company, category.
+- Adds boolean flags:
+  - has_return_mention
+  - has_warranty_mention
+- Computes relevance_score with focus keywords.
+- Sets is_warranty_return_relevant = relevance_score > 0.
+- Returns one structured dictionary record.
+
+9) scrape_records(target_records, max_sitemaps, crawl_delay)
+- Main crawl loop:
+  - iterate complaint sitemaps,
+  - iterate complaint URLs,
+  - robots check each URL,
+  - fetch and parse,
+  - keep only relevant records,
+  - track statuses in crawl_log,
+  - sleep(crawl_delay) between requests.
+
+10) main()
+- Parses CLI args.
+- Runs scraping.
+- Writes raw records, crawl log, crawl meta, and robots.txt snapshot.
+
+CLI example:
+python src/scraper/scrape_complaints.py --target-records 80 --max-sitemaps 2 --crawl-delay 0.5
+
+
+============================================================
+3.2 src/pipeline/preprocess.py
+============================================================
+
+Purpose:
+- Clean text and standardize records.
+- Remove duplicates.
+- Add issue labels and reliability scoring.
+- Create a data quality summary.
+
+Key logic:
+
+1) normalize_text(text)
+- Lowercases text.
+- Removes URLs.
+- Removes punctuation/symbol noise.
+- Compresses whitespace.
+
+2) tokenize(text)
+- Splits to tokens.
+- Removes stopwords (English stopwords + extra custom words).
+- Keeps tokens length > 2.
+
+3) classify_issues(text)
+- Rule-based multi-label assignment using ISSUE_KEYWORDS:
+  - delivery_issue
+  - defective_product
+  - refund_return_issue
+  - warranty_claim_issue
+  - support_issue
+  - billing_issue
+- If no match: other
+
+4) build_root_cause_suggestion(issue_labels)
+- Creates explainable suggestion text from labels.
+
+5) reliability_score(rating, issue_labels)
+- Starts at 100.
+- Decreases score based on:
+  - lower rating (if available),
+  - multiple issue labels,
+  - specific penalty for defect/warranty issues.
+- Clamps final value to 0..100.
+
+6) deduplicate_records(records)
+- Dedup key = raw_url + hash(normalized_text).
+- Removes exact near-duplicates from crawling.
+
+7) preprocess_records(records)
+- Runs full transformation per record:
+  - normalized text,
+  - tokens,
+  - labels,
+  - mention flags,
+  - root cause suggestion,
+  - reliability score,
+  - missing field counters.
+- Builds summary:
+  - total_input_records
+  - total_output_records
+  - duplicates_removed
+  - missing_fields counts
+
+8) main()
+- Reads raw JSON.
+- Writes cleaned JSON and preprocessing summary.
+
+CLI example:
+python src/pipeline/preprocess.py
+
+
+============================================================
+3.3 src/analysis/ai_issue_classifier.py
+============================================================
+
+Purpose:
+- Add an AI layer on top of rule-based preprocessing.
+- Predict issue label and confidence.
+- Attach AI suggestion field.
+
+How it works:
+
+1) primary_label(issue_labels)
+- Converts multi-label list to one label for model training.
+- Uses first label in list.
+
+2) build_model()
+- Pipeline:
+  - TF-IDF vectorizer (1-2 grams),
+  - LogisticRegression classifier.
+
+3) train_and_predict(records)
+- Reads text and labels.
+- Checks data suitability:
+  - at least 2 unique labels,
+  - enough records,
+  - each class has at least 2 records.
+
+Branch A: Sufficient data
+- train_test_split(stratify=labels)
+- fit model
+- predict labels and probabilities
+- write:
+  - ai_predicted_issue
+  - ai_confidence
+  - ai_root_cause_suggestion
+- output metrics:
+  - accuracy, macro_f1, weighted_f1
+
+Branch B: Insufficient data (fallback)
+- No model training.
+- Uses rule-based primary label.
+- Sets ai_confidence to 0.55.
+- Still outputs explainable suggestion.
+- Saves reason and class counts in metrics file.
+
+4) main()
+- Reads clean_reviews.json.
+- Writes clean_reviews_ai.json and ai_metrics.json.
+
+CLI example:
+python src/analysis/ai_issue_classifier.py
+
+
+============================================================
+3.4 src/analysis/eda.py
+============================================================
+
+Purpose:
+- Generate statistical understanding and visual evidence.
+
+Main functions:
+
+1) analysis_summary(df)
+- Computes:
+  - total records
+  - return mention count
+  - warranty mention count
+  - avg rating
+  - avg reliability score
+  - top issue categories
+  - top keywords
+  - distinct company count
+
+2) make_visuals(df, figures_dir)
+- Creates 5 plots:
+  1. rating_distribution.png
+  2. top_issue_categories.png
+  3. return_warranty_mentions.png
+  4. issue_trend_over_time.png
+  5. top_keywords.png
+
+- Includes fallback messages inside plots if data is missing.
+
+3) write_markdown_report(summary, path)
+- Writes human-readable markdown summary of key stats.
+
+4) main()
+- Loads AI-enriched dataset.
+- Adds default columns if missing (robustness).
+- Saves JSON summary + markdown summary + plots.
+
+CLI example:
+python src/analysis/eda.py
+
+
+============================================================
+3.5 src/product/cli.py
+============================================================
+
+Purpose:
+- Provide a simple product interface (IR retrieval).
+
+How search works:
+- Build TF-IDF matrix over review_text_normalized.
+- Vectorize query.
+- Compute cosine similarity(query, all_records).
+- Sort descending.
+- Return top-k records with similarity score.
+
+Displayed output includes:
+- company, title, predicted issue, confidence,
+- root cause suggestion,
+- rating/date/url,
+- first 700 chars of complaint text.
+
+CLI example:
+python src/product/cli.py "warranty claim denied refund" --top-k 5
+
+
+------------------------------------------------------------
+4) Worked Example (Step-by-Step Dissection)
+------------------------------------------------------------
+
+Below is an illustrative example to show how one record moves through the system.
+
+Input complaint text (simplified):
+"I returned a defective truck cap and requested a full refund.
+ The dealer charged a restocking fee and denied a proper warranty response."
+
+Step 1 - Scraper extraction (raw record)
+- review_text: full original text
+- has_return_mention: true (contains "returned", "refund")
+- has_warranty_mention: true (contains "warranty")
+- relevance_score: > 0
+- is_warranty_return_relevant: true
+- record kept in data/raw/raw_reviews.json
+
+Step 2 - Preprocess normalization
+Original:
+"I returned a defective truck cap ... warranty response."
+Normalized:
+"i returned a defective truck cap and requested a full refund the dealer charged a restocking fee and denied a proper warranty response"
+
+Step 3 - Tokenization
+Example tokens (approx):
+["returned", "defective", "truck", "cap", "requested", "full", "refund", "dealer", "charged", "restocking", "fee", "denied", "proper", "warranty", "response"]
+
+Step 4 - Issue classification
+Matching rules:
+- refund_return_issue -> matched (returned/refund)
+- defective_product -> matched (defective)
+- billing_issue -> matched (charged/fee)
+- warranty_claim_issue -> matched (warranty)
+
+issue_labels becomes:
+["defective_product", "refund_return_issue", "warranty_claim_issue", "billing_issue"]
+
+Step 5 - Root cause suggestion + reliability
+- root_cause_suggestion picks first matching priority branch.
+  (In current code, defective_product is checked first.)
+- reliability_score decreases due to multiple issue labels and defect/warranty penalties.
+
+Step 6 - AI enrichment
+If model branch active:
+- ai_predicted_issue might be "refund_return_issue"
+- ai_confidence might be e.g. 0.81
+
+If fallback branch active:
+- ai_predicted_issue = first rule label
+- ai_confidence = 0.55
+
+Step 7 - EDA impact
+This record contributes to:
+- return mention count
+- warranty mention count
+- issue category frequencies
+- keyword frequencies
+
+Step 8 - CLI retrieval
+For query:
+"refund denied warranty claim"
+This record gets high similarity and appears near top results.
+
+
+------------------------------------------------------------
+5) Command Flow (from zero to full output)
+------------------------------------------------------------
+
+Run in this exact order from project root:
+
+1) Install dependencies
+python -m pip install -r requirements.txt
+
+2) Scrape
+python src/scraper/scrape_complaints.py --target-records 80 --max-sitemaps 2 --crawl-delay 0.5
+
+3) Preprocess
+python src/pipeline/preprocess.py
+
+4) AI
+python src/analysis/ai_issue_classifier.py
+
+5) EDA
+python src/analysis/eda.py
+
+6) Product search
+python src/product/cli.py "warranty claim denied refund" --top-k 5
+
+
+------------------------------------------------------------
+6) Output Files and How to Read Them
+------------------------------------------------------------
+
+Raw layer:
+- data/raw/raw_reviews.json
+  Every scraped relevant record.
+- data/raw/crawl_log.json
+  URL-by-URL crawl status (ok_relevant, skipped, error, etc.).
+- data/raw/crawl_meta.json
+  Crawl parameters and source metadata.
+- data/raw/robots.txt
+  Snapshot evidence of robots policy.
+
+Processing layer:
+- data/processed/clean_reviews.json
+  Cleaned records with tokens, issue labels, reliability score.
+- data/processed/preprocessing_summary.json
+  Missing fields and dedupe summary.
+
+AI layer:
+- data/processed/clean_reviews_ai.json
+  Clean records + AI fields.
+- reports/ai_metrics.json
+  Model/fallback metrics.
+
+Analysis layer:
+- reports/analysis_summary.json
+- reports/analysis_summary.md
+- reports/figures/*.png
+
+
+------------------------------------------------------------
+7) Why This Meets Your Phase 1 Requirements
+------------------------------------------------------------
+
+- Multi-page scraping/crawling: yes (sitemap-driven crawl).
+- Robots compliance: yes (robots checks + saved robots file).
+- Structured storage: yes (JSON schema throughout).
+- Cleaning and preprocessing: yes.
+- Data quality handling: yes (dedupe + missing counts).
+- EDA and visualization: yes (summary + 5 charts).
+- Product interface: yes (CLI retrieval).
+- AI integration: yes (classifier/fallback + AI suggestions).
+
+
+------------------------------------------------------------
+8) Practical Notes and Possible Improvements
+------------------------------------------------------------
+
+Current strengths:
+- Stable end-to-end pipeline.
+- Ethical crawling checks included.
+- Explainable rules and outputs.
+- Clear generated artifacts for reporting.
+
+Potential improvements:
+- Add second non-obvious source for richer data diversity.
+- Improve class balance for stronger trained model metrics.
+- Introduce phrase-based negation handling in labeling.
+- Build a small web dashboard instead of CLI.
+- Add unit tests for parser and preprocessing functions.
+
+
+End of walkthrough.

@@ -1,0 +1,21 @@
+User-agent: *
+Disallow: /spellchecker/
+Disallow: /cdn-cgi/
+Disallow: /texteditor/
+Disallow: /tiny_mce/
+Disallow: /login-twitter/
+Disallow: /login-linkedin/
+Disallow: /login-facebook/
+Disallow: /layer-*
+Disallow: /layer/*
+Disallow: /profile-*
+Disallow: /?search=*
+Disallow: /ajax/
+Disallow: /images/
+Disallow: /redirecting
+Allow: /images/business-screenshot/full/
+Allow: /images/business/full/
+Allow: /images/complaint/full/
+Allow: /images/post/full/
+
+sitemap: https://www.complaintsboard.com/sitemap.xml
