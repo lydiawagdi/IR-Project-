@@ -14,6 +14,41 @@ def load_records(path: Path) -> List[Dict]:
         return json.load(f)
 
 
+def prepare_dataframe(records: List[Dict]) -> pd.DataFrame:
+    df = pd.DataFrame(records)
+    if "rating" not in df.columns:
+        df["rating"] = None
+    if "reliability_score" not in df.columns:
+        df["reliability_score"] = 0.0
+    if "issue_labels" not in df.columns:
+        df["issue_labels"] = [[] for _ in range(len(df))]
+    if "tokens" not in df.columns:
+        df["tokens"] = [[] for _ in range(len(df))]
+    if "has_return_mention" not in df.columns:
+        df["has_return_mention"] = False
+    if "has_warranty_mention" not in df.columns:
+        df["has_warranty_mention"] = False
+    if "review_date" not in df.columns:
+        df["review_date"] = None
+    return df
+
+
+def run_eda_from_records(
+    records: List[Dict],
+    figures_dir: Path,
+    summary_json: Path,
+    summary_md: Path,
+) -> Dict:
+    df = prepare_dataframe(records)
+    summary = analysis_summary(df)
+    make_visuals(df, figures_dir)
+
+    summary_json.parent.mkdir(parents=True, exist_ok=True)
+    summary_json.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    write_markdown_report(summary, summary_md)
+    return summary
+
+
 def save_plot(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     plt.tight_layout()
@@ -48,19 +83,7 @@ def analysis_summary(df: pd.DataFrame) -> Dict:
 def make_visuals(df: pd.DataFrame, figures_dir: Path) -> None:
     sns.set_theme(style="whitegrid")
 
-    # 1) Rating distribution
-    plt.figure(figsize=(8, 4))
-    rating_values = df["rating"].dropna()
-    if not rating_values.empty:
-        sns.countplot(x=rating_values.astype(int), color="#4c72b0")
-        plt.title("Rating Distribution")
-        plt.xlabel("Rating")
-        plt.ylabel("Count")
-    else:
-        plt.text(0.5, 0.5, "No rating values available", ha="center")
-    save_plot(figures_dir / "rating_distribution.png")
-
-    # 2) Top issue categories
+    # 1) Top issue categories
     issue_counter = Counter()
     for labels in df["issue_labels"]:
         if isinstance(labels, list):
@@ -76,7 +99,7 @@ def make_visuals(df: pd.DataFrame, figures_dir: Path) -> None:
         plt.text(0.5, 0.5, "No issue labels available", ha="center")
     save_plot(figures_dir / "top_issue_categories.png")
 
-    # 3) Return vs warranty mention rates
+    # 2) Return vs warranty mention rates
     mention_df = pd.DataFrame(
         {
             "type": ["return_mention", "warranty_mention"],
@@ -90,24 +113,7 @@ def make_visuals(df: pd.DataFrame, figures_dir: Path) -> None:
     plt.ylabel("Count")
     save_plot(figures_dir / "return_warranty_mentions.png")
 
-    # 4) Temporal trend
-    temporal = df.copy()
-    temporal["review_date_parsed"] = pd.to_datetime(temporal["review_date"], errors="coerce")
-    temporal = temporal.dropna(subset=["review_date_parsed"])
-    plt.figure(figsize=(10, 4))
-    if not temporal.empty:
-        temporal["month"] = temporal["review_date_parsed"].dt.to_period("M").astype(str)
-        by_month = temporal.groupby("month").size().reset_index(name="count").tail(12)
-        sns.lineplot(data=by_month, x="month", y="count", marker="o")
-        plt.xticks(rotation=45, ha="right")
-        plt.title("Issue Volume Over Time (Last 12 Months in Dataset)")
-        plt.xlabel("Month")
-        plt.ylabel("Complaints Count")
-    else:
-        plt.text(0.5, 0.5, "No valid date values available", ha="center")
-    save_plot(figures_dir / "issue_trend_over_time.png")
-
-    # 5) Top keywords
+    # 3) Top keywords
     keyword_counter = Counter()
     for tokens in df["tokens"]:
         if isinstance(tokens, list):
@@ -146,10 +152,8 @@ def write_markdown_report(summary: Dict, path: Path) -> None:
         lines.append(f"- {kw}: {count}")
     lines.append("")
     lines.append("## Generated figures")
-    lines.append("- reports/figures/rating_distribution.png")
     lines.append("- reports/figures/top_issue_categories.png")
     lines.append("- reports/figures/return_warranty_mentions.png")
-    lines.append("- reports/figures/issue_trend_over_time.png")
     lines.append("- reports/figures/top_keywords.png")
     path.write_text("\n".join(lines), encoding="utf-8")
 
@@ -179,27 +183,7 @@ def main() -> None:
     args = parser.parse_args()
 
     records = load_records(args.input)
-    df = pd.DataFrame(records)
-
-    if "rating" not in df.columns:
-        df["rating"] = None
-    if "reliability_score" not in df.columns:
-        df["reliability_score"] = 0.0
-    if "issue_labels" not in df.columns:
-        df["issue_labels"] = [[] for _ in range(len(df))]
-    if "tokens" not in df.columns:
-        df["tokens"] = [[] for _ in range(len(df))]
-    if "has_return_mention" not in df.columns:
-        df["has_return_mention"] = False
-    if "has_warranty_mention" not in df.columns:
-        df["has_warranty_mention"] = False
-
-    summary = analysis_summary(df)
-    make_visuals(df, args.figures_dir)
-
-    args.summary_json.parent.mkdir(parents=True, exist_ok=True)
-    args.summary_json.write_text(json.dumps(summary, indent=2), encoding="utf-8")
-    write_markdown_report(summary, args.summary_md)
+    summary = run_eda_from_records(records, args.figures_dir, args.summary_json, args.summary_md)
 
     print(f"EDA complete for {len(df)} records")
     print(f"Summary JSON: {args.summary_json}")

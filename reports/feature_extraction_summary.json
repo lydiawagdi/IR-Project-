@@ -1,0 +1,124 @@
+{
+  "feature_extraction_method": "tfidf + keyword frequency + token statistics",
+  "corpus_features": {
+    "record_count": 25,
+    "vocabulary_size": 7322,
+    "matrix_shape": [
+      25,
+      7322
+    ],
+    "top_corpus_terms": [
+      {
+        "term": "door",
+        "avg_tfidf_weight": 0.039518
+      },
+      {
+        "term": "warranty",
+        "avg_tfidf_weight": 0.036132
+      },
+      {
+        "term": "order",
+        "avg_tfidf_weight": 0.030827
+      },
+      {
+        "term": "contract",
+        "avg_tfidf_weight": 0.028948
+      },
+      {
+        "term": "home",
+        "avg_tfidf_weight": 0.028445
+      },
+      {
+        "term": "return",
+        "avg_tfidf_weight": 0.024397
+      },
+      {
+        "term": "car",
+        "avg_tfidf_weight": 0.022331
+      },
+      {
+        "term": "repair",
+        "avg_tfidf_weight": 0.021689
+      },
+      {
+        "term": "store",
+        "avg_tfidf_weight": 0.020069
+      },
+      {
+        "term": "time",
+        "avg_tfidf_weight": 0.020006
+      },
+      {
+        "term": "chair",
+        "avg_tfidf_weight": 0.019363
+      },
+      {
+        "term": "supervisor",
+        "avg_tfidf_weight": 0.019275
+      },
+      {
+        "term": "replacement",
+        "avg_tfidf_weight": 0.019254
+      },
+      {
+        "term": "issue",
+        "avg_tfidf_weight": 0.019129
+      },
+      {
+        "term": "pay",
+        "avg_tfidf_weight": 0.019044
+      },
+      {
+        "term": "don",
+        "avg_tfidf_weight": 0.018818
+      },
+      {
+        "term": "damage",
+        "avg_tfidf_weight": 0.018766
+      },
+      {
+        "term": "sale",
+        "avg_tfidf_weight": 0.01802
+      },
+      {
+        "term": "install",
+        "avg_tfidf_weight": 0.017825
+      },
+      {
+        "term": "request",
+        "avg_tfidf_weight": 0.01779
+      },
+      {
+        "term": "water",
+        "avg_tfidf_weight": 0.017087
+      },
+      {
+        "term": "refund",
+        "avg_tfidf_weight": 0.017034
+      },
+      {
+        "term": "year",
+        "avg_tfidf_weight": 0.017021
+      },
+      {
+        "term": "dental",
+        "avg_tfidf_weight": 0.016454
+      },
+      {
+        "term": "aspen",
+        "avg_tfidf_weight": 0.016454
+      }
+    ]
+  },
+  "issue_label_distribution": {
+    "defective_product": 12,
+    "refund_return_issue": 25,
+    "warranty_claim_issue": 23,
+    "billing_issue": 11,
+    "delivery_issue": 17,
+    "support_issue": 9
+  },
+  "avg_token_count": 228.24,
+  "records_with_return_signal": 25,
+  "records_with_warranty_signal": 25
+}

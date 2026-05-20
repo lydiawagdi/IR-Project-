@@ -1,120 +1,116 @@
 {
-  "total_records": 80,
-  "records_with_return_mentions": 44,
-  "records_with_warranty_mentions": 32,
-  "avg_rating": null,
-  "avg_reliability_score": 81.275,
+  "total_records": 24,
+  "records_with_return_mentions": 23,
+  "records_with_warranty_mentions": 22,
+  "avg_rating": 1.1111111111111112,
+  "avg_reliability_score": 51.25,
   "top_issue_categories": [
     [
       "refund_return_issue",
-      56
-    ],
-    [
-      "billing_issue",
-      46
-    ],
-    [
-      "delivery_issue",
-      37
+      24
     ],
     [
       "warranty_claim_issue",
-      36
+      22
     ],
     [
-      "support_issue",
-      25
+      "delivery_issue",
+      16
     ],
     [
       "defective_product",
-      20
+      11
     ],
     [
-      "other",
-      2
+      "billing_issue",
+      11
+    ],
+    [
+      "support_issue",
+      9
     ]
   ],
   "top_keywords": [
     [
-      "told",
-      137
-    ],
-    [
-      "said",
-      117
-    ],
-    [
-      "time",
-      89
-    ],
-    [
-      "called",
-      88
-    ],
-    [
-      "new",
-      76
-    ],
-    [
-      "phone",
-      74
-    ],
-    [
-      "account",
-      72
-    ],
-    [
-      "did",
-      70
-    ],
-    [
-      "credit",
-      63
-    ],
-    [
-      "just",
-      61
-    ],
-    [
-      "received",
-      58
-    ],
-    [
-      "house",
+      "warranty",
       56
     ],
     [
+      "international",
+      39
+    ],
+    [
       "return",
-      52
+      38
     ],
     [
-      "asked",
-      49
+      "diamonds",
+      38
     ],
     [
-      "truck",
-      49
+      "door",
+      32
     ],
     [
-      "money",
-      49
+      "contract",
+      32
     ],
     [
-      "card",
-      46
+      "aspen",
+      32
     ],
     [
-      "pay",
-      45
+      "dental",
+      32
     ],
     [
-      "day",
-      44
+      "refund",
+      31
     ],
     [
-      "days",
-      44
+      "time",
+      30
+    ],
+    [
+      "consumer",
+      29
+    ],
+    [
+      "home",
+      28
+    ],
+    [
+      "sale",
+      23
+    ],
+    [
+      "request",
+      22
+    ],
+    [
+      "repair",
+      20
+    ],
+    [
+      "years",
+      20
+    ],
+    [
+      "new",
+      19
+    ],
+    [
+      "purchase",
+      19
+    ],
+    [
+      "issue",
+      18
+    ],
+    [
+      "store",
+      18
     ]
   ],
-  "company_count": 77
+  "company_count": 22
 }

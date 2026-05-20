@@ -1,11 +1,19 @@
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Dict, List
 
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = PROJECT_ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+
+from pipeline.stopwords import STOPWORDS  # noqa: E402
 
 
 def load_records(path: Path) -> List[Dict]:
@@ -15,7 +23,11 @@ def load_records(path: Path) -> List[Dict]:
 
 def search(records: List[Dict], query: str, top_k: int = 5) -> List[Dict]:
     corpus = [r.get("review_text_normalized", "") for r in records]
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=8000)
+    vectorizer = TfidfVectorizer(
+        ngram_range=(1, 2),
+        max_features=8000,
+        stop_words=list(STOPWORDS),
+    )
     matrix = vectorizer.fit_transform(corpus)
     query_vec = vectorizer.transform([query])
     sims = cosine_similarity(query_vec, matrix).flatten()

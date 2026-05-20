@@ -1,0 +1,207 @@
+{
+  "retrieval": {
+    "queries_evaluated": 4,
+    "avg_keyword_hit_rate": 1.0,
+    "query_results": [
+      {
+        "query": "warranty claim denied",
+        "top_k": 5,
+        "keyword_hit_rate": 1.0,
+        "top_results": [
+          {
+            "company": "Steves & Sons",
+            "similarity": 0.0687,
+            "matched_terms": [
+              "warranty",
+              "claim",
+              "denied"
+            ]
+          },
+          {
+            "company": "Home Depot",
+            "similarity": 0.0597,
+            "matched_terms": [
+              "warranty",
+              "denied"
+            ]
+          },
+          {
+            "company": "CyberPowerPC",
+            "similarity": 0.0516,
+            "matched_terms": [
+              "warranty",
+              "claim",
+              "denied"
+            ]
+          },
+          {
+            "company": "HP",
+            "similarity": 0.0429,
+            "matched_terms": [
+              "warranty",
+              "claim"
+            ]
+          },
+          {
+            "company": "Homeguard Homewarranty",
+            "similarity": 0.0312,
+            "matched_terms": [
+              "warranty",
+              "claim"
+            ]
+          }
+        ]
+      },
+      {
+        "query": "refund not received",
+        "top_k": 5,
+        "keyword_hit_rate": 1.0,
+        "top_results": [
+          {
+            "company": "Keurig Green Mountain",
+            "similarity": 0.1781,
+            "matched_terms": [
+              "refund",
+              "return"
+            ]
+          },
+          {
+            "company": "Diamonds International",
+            "similarity": 0.0699,
+            "matched_terms": [
+              "refund",
+              "not",
+              "return"
+            ]
+          },
+          {
+            "company": "Bish's RV",
+            "similarity": 0.0695,
+            "matched_terms": [
+              "return"
+            ]
+          },
+          {
+            "company": "HP",
+            "similarity": 0.0507,
+            "matched_terms": [
+              "refund",
+              "return"
+            ]
+          },
+          {
+            "company": "Citizen Watch Company of America",
+            "similarity": 0.0346,
+            "matched_terms": [
+              "return"
+            ]
+          }
+        ]
+      },
+      {
+        "query": "defective product replacement",
+        "top_k": 5,
+        "keyword_hit_rate": 1.0,
+        "top_results": [
+          {
+            "company": "Eddie Bauer",
+            "similarity": 0.1016,
+            "matched_terms": [
+              "defective",
+              "product"
+            ]
+          },
+          {
+            "company": "CyberPowerPC",
+            "similarity": 0.1011,
+            "matched_terms": [
+              "defective",
+              "product"
+            ]
+          },
+          {
+            "company": "Raymour & Flanigan Furniture",
+            "similarity": 0.0586,
+            "matched_terms": [
+              "defective"
+            ]
+          },
+          {
+            "company": "La-Z-Boy",
+            "similarity": 0.058,
+            "matched_terms": [
+              "defective",
+              "replacement"
+            ]
+          },
+          {
+            "company": "Sleep Number",
+            "similarity": 0.0419,
+            "matched_terms": [
+              "replacement",
+              "product"
+            ]
+          }
+        ]
+      },
+      {
+        "query": "repair under warranty",
+        "top_k": 5,
+        "keyword_hit_rate": 1.0,
+        "top_results": [
+          {
+            "company": "CyberPowerPC",
+            "similarity": 0.1052,
+            "matched_terms": [
+              "warranty",
+              "repair"
+            ]
+          },
+          {
+            "company": "HP",
+            "similarity": 0.0899,
+            "matched_terms": [
+              "warranty",
+              "repair"
+            ]
+          },
+          {
+            "company": "Home Depot",
+            "similarity": 0.0831,
+            "matched_terms": [
+              "warranty"
+            ]
+          },
+          {
+            "company": "Sleep Number",
+            "similarity": 0.0791,
+            "matched_terms": [
+              "warranty",
+              "repair"
+            ]
+          },
+          {
+            "company": "Fidelity National Financial",
+            "similarity": 0.0683,
+            "matched_terms": [
+              "repair"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "classification": {
+    "status": "ok",
+    "records_evaluated": 25,
+    "accuracy": 1.0,
+    "macro_f1": 1.0
+  },
+  "ai_coverage": {
+    "records": 25,
+    "sentiment_coverage": 1.0,
+    "summary_coverage": 1.0,
+    "classification_coverage": 1.0,
+    "negative_sentiment_rate": 0.56
+  }
+}

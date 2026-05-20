@@ -1,8 +1,8 @@
 {
-  "total_input_records": 80,
-  "total_output_records": 80,
+  "total_input_records": 25,
+  "total_output_records": 25,
   "duplicates_removed": 0,
   "missing_fields": {
-    "rating": 80
+    "rating": 16
   }
 }

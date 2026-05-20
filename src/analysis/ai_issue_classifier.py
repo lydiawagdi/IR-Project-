@@ -1,11 +1,19 @@
 import argparse
 import json
+import sys
 from collections import Counter
 from pathlib import Path
 from typing import Dict, List
 
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = PROJECT_ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+
+from pipeline.stopwords import STOPWORDS  # noqa: E402
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
@@ -39,7 +47,7 @@ def suggestion_from_label(label: str) -> str:
 def build_model() -> Pipeline:
     return Pipeline(
         steps=[
-            ("tfidf", TfidfVectorizer(ngram_range=(1, 2), max_features=8000)),
+            ("tfidf", TfidfVectorizer(ngram_range=(1, 2), max_features=8000, stop_words=list(STOPWORDS))),
             ("clf", LogisticRegression(max_iter=600, class_weight="balanced")),
         ]
     )

@@ -5,5 +5,7 @@ pandas
 requests
 scikit-learn
 seaborn
+selenium
 streamlit
+webdriver-manager
 wordcloud

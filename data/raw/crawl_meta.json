@@ -1,12 +1,18 @@
 {
-  "target_records": 80,
-  "records_collected": 80,
-  "max_sitemaps": 2,
-  "sitemaps_used": [
-    "https://www.complaintsboard.com/sitemap/complaints-1.xml",
-    "https://www.complaintsboard.com/sitemap/complaints-2.xml"
-  ],
-  "user_agent": "IR-Project-WarrantyReturnAnalyzer/1.0 (+course-project)",
+  "target_records": 25,
+  "records_collected": 25,
+  "max_categories": 2,
+  "max_subcategories_per_category": 2,
+  "max_search_pages": 2,
+  "entry_points": {
+    "categories_url": "https://www.complaintsboard.com/categories",
+    "search_url": "https://www.complaintsboard.com/?search=warranty+and+return"
+  },
+  "queued_complaint_urls": 38,
+  "scraper_engine": "selenium",
+  "light_mode": true,
+  "min_year": 2022,
+  "user_agent": "IR-Project-WarrantyReturnAnalyzer/2.0 (+course-project; selenium)",
   "source": "https://www.complaintsboard.com",
-  "generated_at": "2026-05-04T21:11:57.169910+00:00"
+  "generated_at": "2026-05-20T19:56:42.584550+00:00"
 }

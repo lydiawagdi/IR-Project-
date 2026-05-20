@@ -6,29 +6,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
-
-
-EXTRA_STOPWORDS = {
-    "would",
-    "could",
-    "also",
-    "one",
-    "two",
-    "get",
-    "got",
-    "im",
-    "ive",
-    "cant",
-    "didnt",
-    "dont",
-    "doesnt",
-    "company",
-    "service",
-    "customer",
-}
-
-STOPWORDS = set(ENGLISH_STOP_WORDS).union(EXTRA_STOPWORDS)
+from stopwords import STOPWORDS
 
 RETURN_KEYWORDS = {
     "return",
@@ -136,8 +114,10 @@ def preprocess_records(records: List[Dict]) -> Tuple[List[Dict], Dict]:
     missing_fields_counter = Counter()
 
     for idx, record in enumerate(records, start=1):
-        text = normalize_text(record.get("review_text", ""))
+        source_text = record.get("full_text_with_comments") or record.get("review_text", "")
+        text = normalize_text(source_text)
         tokens = tokenize(text)
+        filtered_text = " ".join(tokens) if tokens else text
         issue_labels = classify_issues(text)
 
         company = record.get("company") or "unknown"
@@ -153,7 +133,7 @@ def preprocess_records(records: List[Dict]) -> Tuple[List[Dict], Dict]:
         if rating is None:
             missing_fields_counter["rating"] += 1
 
-        lower = text.lower()
+        lower = filtered_text.lower() if filtered_text else text.lower()
         has_return = any(k in lower for k in RETURN_KEYWORDS)
         has_warranty = any(k in lower for k in WARRANTY_KEYWORDS)
 
@@ -163,17 +143,29 @@ def preprocess_records(records: List[Dict]) -> Tuple[List[Dict], Dict]:
                 "source": record.get("source", "complaintsboard"),
                 "company": company,
                 "category": record.get("category", "appliances-electronics-and-technology"),
+                "breadcrumbs": record.get("breadcrumbs", []),
                 "title": record.get("title", "unknown"),
                 "review_text": record.get("review_text", ""),
-                "review_text_normalized": text,
+                "review_text_normalized": filtered_text,
+                "full_text_with_comments": record.get("full_text_with_comments", source_text),
                 "tokens": tokens,
                 "review_date": review_date,
+                "review_updated_date": record.get("review_updated_date"),
+                "reviewer_name": record.get("reviewer_name"),
+                "reviewer_location": record.get("reviewer_location"),
                 "rating": rating,
+                "comment_count": record.get("comment_count", 0),
+                "helpful_count": record.get("helpful_count"),
+                "claimed_loss": record.get("claimed_loss"),
+                "desired_outcome": record.get("desired_outcome"),
+                "is_featured_review": record.get("is_featured_review", False),
+                "comments": record.get("comments", []),
                 "has_return_mention": has_return,
                 "has_warranty_mention": has_warranty,
                 "issue_labels": issue_labels,
                 "root_cause_suggestion": build_root_cause_suggestion(issue_labels),
                 "reliability_score": reliability_score(rating, issue_labels),
+                "discovery_source": record.get("discovery_source"),
                 "raw_url": record.get("raw_url", ""),
             }
         )
